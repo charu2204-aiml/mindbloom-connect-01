@@ -6,9 +6,7 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        console.log("[chat] start");
         const { messages } = (await request.json()) as { messages: { role: string; content: string }[] };
-        console.log("[chat] parsed");
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("AI is not configured.", { status: 500 });
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
