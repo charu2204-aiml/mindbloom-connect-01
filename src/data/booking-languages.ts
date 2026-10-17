@@ -1,0 +1,8 @@
+export const bookingLanguages = {
+  en: { name: "English", yourName: "Your name", date: "Session date", time: "Session time", concern: "What would you like help with?", submit: "Submit for approval", requested: "Request submitted", done: "Done", note: "Write in any language you’re comfortable with." },
+  ta: { name: "தமிழ்", yourName: "உங்கள் பெயர்", date: "சந்திப்பு தேதி", time: "சந்திப்பு நேரம்", concern: "எதற்கு உதவி தேவை?", submit: "ஒப்புதலுக்காக அனுப்பவும்", requested: "கோரிக்கை அனுப்பப்பட்டது", done: "முடிந்தது", note: "உங்களுக்கு வசதியான எந்த மொழியிலும் எழுதலாம்." },
+  hi: { name: "हिन्दी", yourName: "आपका नाम", date: "सत्र की तारीख", time: "सत्र का समय", concern: "आप किस विषय में सहायता चाहते हैं?", submit: "स्वीकृति के लिए भेजें", requested: "अनुरोध भेज दिया गया", done: "पूर्ण", note: "आप अपनी सुविधानुसार किसी भी भाषा में लिख सकते हैं।" },
+  te: { name: "తెలుగు", yourName: "మీ పేరు", date: "సమావేశం తేదీ", time: "సమావేశం సమయం", concern: "మీకు ఏ విషయంలో సహాయం కావాలి?", submit: "ఆమోదం కోసం పంపండి", requested: "అభ్యర్థన పంపబడింది", done: "పూర్తయింది", note: "మీకు సౌకర్యంగా ఉన్న ఏ భాషలోనైనా రాయవచ్చు." },
+  ml: { name: "മലയാളം", yourName: "നിങ്ങളുടെ പേര്", date: "സെഷൻ തീയതി", time: "സെഷൻ സമയം", concern: "എന്തിനാണ് സഹായം വേണ്ടത്?", submit: "അംഗീകാരത്തിനായി അയയ്ക്കുക", requested: "അഭ്യർത്ഥന അയച്ചു", done: "പൂർത്തിയായി", note: "നിങ്ങൾക്ക് സൗകര്യപ്രദമായ ഏത് ഭാഷയിലും എഴുതാം." },
+};
+export type BookingLanguage = keyof typeof bookingLanguages;

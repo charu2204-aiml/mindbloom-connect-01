@@ -4,6 +4,12 @@ import hero from "@/assets/hero.jpg";
 import { consultants, cities, travelPackages, foodPackages, type Consultant } from "@/data/consultants";
 import { BubblePop, Breathing } from "@/components/StressGame";
 import { Footer } from "@/components/Footer";
+import { TherapyMoments } from "@/components/TherapyMoments";
+import { TherapyClips } from "@/components/TherapyClips";
+import { CareJourney } from "@/components/CareJourney";
+import { Button } from "@/components/ui/button";
+import { bookingLanguages, type BookingLanguage } from "@/data/booking-languages";
+import { type CareSession } from "@/lib/care-journey";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -12,6 +18,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Verified clinical psychologists near you with intro videos, licence proof, transparent fees, travel & food packages." },
       { property: "og:title", content: "TherapEase — Trusted in-person therapy in India" },
       { property: "og:description", content: "Verified therapists, affordable fees and complete care packages." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
@@ -37,10 +45,12 @@ function Index() {
   const [city, setCity] = useState("");
   const [maxFee, setMaxFee] = useState(4000);
   const [booking, setBooking] = useState<Consultant | null>(null);
+  const [sessions, setSessions] = useState<CareSession[]>([]);
+  const [language, setLanguage] = useState<BookingLanguage>("en");
   const [travel, setTravel] = useState(0);
   const [food, setFood] = useState(0);
   const [days, setDays] = useState(2);
-  const [sessionFee, setSessionFee] = useState(consultants[0]!.fee);
+  const [sessionFee, setSessionFee] = useState(consultants[0]?.fee ?? 0);
 
   const list = useMemo(
     () =>
@@ -52,7 +62,15 @@ function Index() {
     [q, city, maxFee],
   );
 
-  const total = sessionFee + travelPackages[travel]!.price + foodPackages[food]!.perDay * days;
+  const travelPrice = travelPackages[travel]?.price ?? 0;
+  const foodPrice = foodPackages[food]?.perDay ?? 0;
+  const total = sessionFee + travelPrice + foodPrice * days;
+  function bookAgain() {
+    const recent = sessions.at(-1);
+    const consultant = consultants.find(c => c.name === recent?.consultant);
+    if (consultant) setBooking(consultant);
+    else document.getElementById("consultants")?.scrollIntoView({ behavior: "smooth" });
+  }
 
   return (
     <div className="overflow-x-hidden">
@@ -62,7 +80,10 @@ function Index() {
           <nav className="hidden gap-6 text-sm md:flex">
             <a href="#how">How it works</a><a href="#consultants">Consultants</a><a href="#packages">Packages</a><a href="#relax">Relax</a>
           </nav>
-          <a href="#consultants" className="btn-primary !px-4 !py-2">Find a therapist</a>
+          <div className="flex items-center gap-2">
+            <select aria-label="Booking form language" className="max-w-28 rounded-md border bg-card px-2 py-2 text-sm" value={language} onChange={e => { const value = e.target.value; if (value in bookingLanguages) setLanguage(value as BookingLanguage); }}>{Object.entries(bookingLanguages).map(([code, labels]) => <option key={code} value={code}>{labels.name}</option>)}</select>
+            <a href="#consultants" className="btn-primary !px-4 !py-2">Find a therapist</a>
+          </div>
         </div>
       </header>
 
@@ -109,6 +130,9 @@ function Index() {
           </div>
         </div>
       </section>
+
+      <TherapyMoments />
+      <TherapyClips />
 
       {/* Search + list */}
       <section id="consultants" className="mx-auto max-w-6xl px-5 py-16">
@@ -190,8 +214,8 @@ function Index() {
               </label>
               <div className="mt-4 space-y-1 text-sm">
                 <p className="flex justify-between"><span>Session</span><span>₹{sessionFee.toLocaleString("en-IN")}</span></p>
-                <p className="flex justify-between"><span>Travel</span><span>₹{travelPackages[travel]!.price.toLocaleString("en-IN")}</span></p>
-                <p className="flex justify-between"><span>Food × {days}</span><span>₹{(foodPackages[food]!.perDay * days).toLocaleString("en-IN")}</span></p>
+                  <p className="flex justify-between"><span>Travel</span><span>₹{travelPrice.toLocaleString("en-IN")}</span></p>
+                  <p className="flex justify-between"><span>Food × {days}</span><span>₹{(foodPrice * days).toLocaleString("en-IN")}</span></p>
               </div>
               <p className="mt-4 flex justify-between border-t pt-4 text-lg font-bold"><span>Total</span><span className="text-primary">₹{total.toLocaleString("en-IN")}</span></p>
             </div>
@@ -209,6 +233,7 @@ function Index() {
       </section>
 
       {/* Relax */}
+      <CareJourney sessions={sessions} onSessionsChange={setSessions} onBook={bookAgain} />
       <section id="relax" className="mx-auto max-w-6xl px-5 pb-8">
         <h2 className="text-3xl md:text-4xl">Take a breather</h2>
         <p className="mt-2 text-muted-foreground">Quick stress-busters while you wait.</p>
@@ -216,37 +241,40 @@ function Index() {
       </section>
 
       <Footer />
-      {booking && <BookingModal c={booking} onClose={() => setBooking(null)} />}
+      {booking && <BookingModal c={booking} language={language} onLanguageChange={setLanguage} onRequest={(date, time) => setSessions(previous => [...previous, { id: crypto.randomUUID(), consultant: booking.name, date, time, status: "Requested" }])} onClose={() => setBooking(null)} />}
     </div>
   );
 }
 
-function BookingModal({ c, onClose }: { c: Consultant; onClose: () => void }) {
+function BookingModal({ c, onClose, language, onLanguageChange, onRequest }: { c: Consultant; onClose: () => void; language: BookingLanguage; onLanguageChange: (language: BookingLanguage) => void; onRequest: (date: string, time: string) => void }) {
   const [done, setDone] = useState(false);
+  const labels = bookingLanguages[language];
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-plum/50 p-4" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-card p-6 shadow-soft" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label={c.name} lang={language} className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-card p-6 shadow-soft" onClick={(e) => e.stopPropagation()}>
         {done ? (
           <div className="py-6 text-center">
             <p className="text-4xl">🌸</p>
-            <h3 className="mt-3 text-2xl">Request submitted</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{c.name} will review and approve your session. We'll notify you shortly.</p>
-            <button onClick={onClose} className="btn-primary mt-6">Done</button>
+            <h3 className="mt-3 text-2xl">{labels.requested}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Prototype request added to your care dates. It has not been sent to {c.name}.</p>
+            <Button onClick={onClose} className="mt-6">{labels.done}</Button>
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setDone(true); }} className="space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); const data = new FormData(e.currentTarget); onRequest(String(data.get("date")), String(data.get("time"))); setDone(true); }} className="space-y-3">
             <div className="flex items-start justify-between">
               <div><h3 className="text-2xl">{c.name}</h3><p className="text-sm text-muted-foreground">{c.title} · 📍 {c.city}</p></div>
-              <button type="button" onClick={onClose} className="text-2xl text-muted-foreground">×</button>
+              <Button type="button" variant="ghost" size="icon" aria-label="Close booking" onClick={onClose}>×</Button>
             </div>
             <p className="rounded-xl bg-muted p-3 text-sm">{c.bio} <b className="text-primary">First session ₹{c.fee}</b></p>
-            <input required className="input-field" placeholder="Your name" />
+            <select aria-label="Form language" className="input-field" value={language} onChange={e => { const value = e.target.value; if (value in bookingLanguages) onLanguageChange(value as BookingLanguage); }}>{Object.entries(bookingLanguages).map(([code, value]) => <option key={code} value={code}>{value.name}</option>)}</select>
+            <p className="text-xs text-muted-foreground">{labels.note}</p>
+            <label className="block text-sm">{labels.yourName}<input name="name" required autoComplete="name" className="input-field mt-1" placeholder={labels.yourName} /></label>
             <div className="grid grid-cols-2 gap-3">
-              <input required type="date" className="input-field" />
-              <input required type="time" className="input-field" />
+              <label className="min-w-0 text-sm">{labels.date}<input name="date" required type="date" className="input-field mt-1 min-w-0" /></label>
+              <label className="min-w-0 text-sm">{labels.time}<input name="time" required type="time" className="input-field mt-1 min-w-0" /></label>
             </div>
-            <textarea required rows={4} className="input-field" placeholder="Briefly describe what you'd like help with" />
-            <button className="btn-primary w-full">Submit for approval</button>
+            <label className="block text-sm">{labels.concern}<textarea name="concern" required rows={4} className="input-field mt-1" placeholder={labels.concern} /></label>
+            <Button className="h-auto min-h-10 w-full whitespace-normal">{labels.submit}</Button>
           </form>
         )}
       </div>

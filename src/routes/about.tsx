@@ -8,6 +8,8 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "Why TherapEase exists: one trusted place to find licensed therapists across India." },
       { property: "og:title", content: "About TherapEase" },
       { property: "og:description", content: "One trusted place to find licensed therapists across India." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: About,

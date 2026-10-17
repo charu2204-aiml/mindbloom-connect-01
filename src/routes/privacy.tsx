@@ -8,6 +8,8 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "How TherapEase protects your personal and health information." },
       { property: "og:title", content: "Privacy & Policy — TherapEase" },
       { property: "og:description", content: "How TherapEase protects your personal and health information." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Privacy,
