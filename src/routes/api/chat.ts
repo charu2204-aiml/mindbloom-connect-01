@@ -25,27 +25,25 @@ export const Route = createFileRoute("/api/chat")({
           const msg = upstream.status === 429 ? "Too many requests, please wait a moment." : upstream.status === 402 ? "AI credits are used up for now." : "The assistant is unavailable right now.";
           return new Response(msg, { status: upstream.status });
         }
-        const reader = upstream.body.getReader();
         const dec = new TextDecoder();
         const enc = new TextEncoder();
         let buf = "";
-        const stream = new ReadableStream({
-          async pull(controller) {
-            const { done, value } = await reader.read();
-            if (done) return controller.close();
-            buf += dec.decode(value, { stream: true });
-            const lines = buf.split("\n");
-            buf = lines.pop() ?? "";
-            for (const line of lines) {
-              if (!line.startsWith("data:")) continue;
-              try {
-                const ev = JSON.parse(line.slice(5).trim());
-                if (ev.type === "response.output_text.delta") controller.enqueue(enc.encode(ev.delta));
-              } catch {}
-            }
-          },
-          cancel() { reader.cancel(); },
-        });
+        const stream = upstream.body.pipeThrough(
+          new TransformStream<Uint8Array, Uint8Array>({
+            transform(chunk, controller) {
+              buf += dec.decode(chunk, { stream: true });
+              const lines = buf.split("\n");
+              buf = lines.pop() ?? "";
+              for (const line of lines) {
+                if (!line.startsWith("data:")) continue;
+                try {
+                  const ev = JSON.parse(line.slice(5).trim());
+                  if (ev.type === "response.output_text.delta") controller.enqueue(enc.encode(ev.delta));
+                } catch {}
+              }
+            },
+          }),
+        );
         return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
       },
     },
