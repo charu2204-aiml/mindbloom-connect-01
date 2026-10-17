@@ -20,7 +20,6 @@ export const Route = createFileRoute("/api/chat")({
             store: false,
             stream: true,
           }),
-          signal: request.signal,
         });
         if (!upstream.ok || !upstream.body) {
           const msg = upstream.status === 429 ? "Too many requests, please wait a moment." : upstream.status === 402 ? "AI credits are used up for now." : "The assistant is unavailable right now.";
