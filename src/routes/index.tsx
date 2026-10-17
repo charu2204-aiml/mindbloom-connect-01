@@ -40,7 +40,7 @@ function Index() {
   const [travel, setTravel] = useState(0);
   const [food, setFood] = useState(0);
   const [days, setDays] = useState(2);
-  const [sessionFee, setSessionFee] = useState(consultants[0].fee);
+  const [sessionFee, setSessionFee] = useState(consultants[0]!.fee);
 
   const list = useMemo(
     () =>
@@ -52,7 +52,7 @@ function Index() {
     [q, city, maxFee],
   );
 
-  const total = sessionFee + travelPackages[travel].price + foodPackages[food].perDay * days;
+  const total = sessionFee + travelPackages[travel]!.price + foodPackages[food]!.perDay * days;
 
   return (
     <div className="overflow-x-hidden">
@@ -190,8 +190,8 @@ function Index() {
               </label>
               <div className="mt-4 space-y-1 text-sm">
                 <p className="flex justify-between"><span>Session</span><span>₹{sessionFee.toLocaleString("en-IN")}</span></p>
-                <p className="flex justify-between"><span>Travel</span><span>₹{travelPackages[travel].price.toLocaleString("en-IN")}</span></p>
-                <p className="flex justify-between"><span>Food × {days}</span><span>₹{(foodPackages[food].perDay * days).toLocaleString("en-IN")}</span></p>
+                <p className="flex justify-between"><span>Travel</span><span>₹{travelPackages[travel]!.price.toLocaleString("en-IN")}</span></p>
+                <p className="flex justify-between"><span>Food × {days}</span><span>₹{(foodPackages[food]!.perDay * days).toLocaleString("en-IN")}</span></p>
               </div>
               <p className="mt-4 flex justify-between border-t pt-4 text-lg font-bold"><span>Total</span><span className="text-primary">₹{total.toLocaleString("en-IN")}</span></p>
             </div>
