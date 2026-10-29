@@ -11,7 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CareRouteImport } from './routes/care'
+import { Route as ConsultantsRouteImport } from './routes/consultants'
+import { Route as FoodTravelRouteImport } from './routes/food-travel'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RelaxRouteImport } from './routes/relax'
+import { Route as RiderRouteImport } from './routes/rider'
+import { Route as TrackingRouteImport } from './routes/tracking'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +32,49 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareRoute = CareRouteImport.update({
+  id: '/care',
+  path: '/care',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultantsRoute = ConsultantsRouteImport.update({
+  id: '/consultants',
+  path: '/consultants',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodTravelRoute = FoodTravelRouteImport.update({
+  id: '/food-travel',
+  path: '/food-travel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelaxRoute = RelaxRouteImport.update({
+  id: '/relax',
+  path: '/relax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiderRoute = RiderRouteImport.update({
+  id: '/rider',
+  path: '/rider',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackingRoute = TrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -38,34 +86,103 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/care': typeof CareRoute
+  '/consultants': typeof ConsultantsRoute
+  '/food-travel': typeof FoodTravelRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
+  '/relax': typeof RelaxRoute
+  '/rider': typeof RiderRoute
+  '/tracking': typeof TrackingRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/care': typeof CareRoute
+  '/consultants': typeof ConsultantsRoute
+  '/food-travel': typeof FoodTravelRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
+  '/relax': typeof RelaxRoute
+  '/rider': typeof RiderRoute
+  '/tracking': typeof TrackingRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/care': typeof CareRoute
+  '/consultants': typeof ConsultantsRoute
+  '/food-travel': typeof FoodTravelRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
+  '/relax': typeof RelaxRoute
+  '/rider': typeof RiderRoute
+  '/tracking': typeof TrackingRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/privacy' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/care'
+    | '/consultants'
+    | '/food-travel'
+    | '/how-it-works'
+    | '/packages'
+    | '/privacy'
+    | '/relax'
+    | '/rider'
+    | '/tracking'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/privacy' | '/api/chat'
-  id: '__root__' | '/' | '/about' | '/privacy' | '/api/chat'
+  to:
+    | '/'
+    | '/about'
+    | '/care'
+    | '/consultants'
+    | '/food-travel'
+    | '/how-it-works'
+    | '/packages'
+    | '/privacy'
+    | '/relax'
+    | '/rider'
+    | '/tracking'
+    | '/api/chat'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/care'
+    | '/consultants'
+    | '/food-travel'
+    | '/how-it-works'
+    | '/packages'
+    | '/privacy'
+    | '/relax'
+    | '/rider'
+    | '/tracking'
+    | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CareRoute: typeof CareRoute
+  ConsultantsRoute: typeof ConsultantsRoute
+  FoodTravelRoute: typeof FoodTravelRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  PackagesRoute: typeof PackagesRoute
   PrivacyRoute: typeof PrivacyRoute
+  RelaxRoute: typeof RelaxRoute
+  RiderRoute: typeof RiderRoute
+  TrackingRoute: typeof TrackingRoute
   ApiChatRoute: typeof ApiChatRoute
 }
 
@@ -85,11 +202,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/care': {
+      id: '/care'
+      path: '/care'
+      fullPath: '/care'
+      preLoaderRoute: typeof CareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultants': {
+      id: '/consultants'
+      path: '/consultants'
+      fullPath: '/consultants'
+      preLoaderRoute: typeof ConsultantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food-travel': {
+      id: '/food-travel'
+      path: '/food-travel'
+      fullPath: '/food-travel'
+      preLoaderRoute: typeof FoodTravelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relax': {
+      id: '/relax'
+      path: '/relax'
+      fullPath: '/relax'
+      preLoaderRoute: typeof RelaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rider': {
+      id: '/rider'
+      path: '/rider'
+      fullPath: '/rider'
+      preLoaderRoute: typeof RiderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tracking': {
+      id: '/tracking'
+      path: '/tracking'
+      fullPath: '/tracking'
+      preLoaderRoute: typeof TrackingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -105,7 +278,15 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CareRoute: CareRoute,
+  ConsultantsRoute: ConsultantsRoute,
+  FoodTravelRoute: FoodTravelRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  PackagesRoute: PackagesRoute,
   PrivacyRoute: PrivacyRoute,
+  RelaxRoute: RelaxRoute,
+  RiderRoute: RiderRoute,
+  TrackingRoute: TrackingRoute,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport

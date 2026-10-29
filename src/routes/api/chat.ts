@@ -1,17 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const SYSTEM = `You are "Ease", the friendly assistant of TherapEase, an Indian platform that connects people with licensed clinical psychologists for in-person therapy, with travel and food packages. Be warm, brief and supportive. You are not a therapist and never diagnose. If someone mentions self-harm or crisis, urge them to call Tele-MANAS 14416 or 112 immediately.`;
+const SYSTEM = `You are "Peace", the friendly assistant of TheraPeace, an Indian platform that connects people with licensed clinical psychologists for in-person therapy, with travel and food packages. Be warm, brief and supportive. You are not a therapist and never diagnose. If someone mentions self-harm or crisis, urge them to call Tele-MANAS 14416 or 112 immediately.`;
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as { messages: { role: string; content: string }[] };
+        const { messages } = (await request.json()) as {
+          messages: { role: string; content: string }[];
+        };
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return new Response("AI is not configured.", { status: 500 });
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
+          headers: {
+            "Content-Type": "application/json",
+            "Lovable-API-Key": key,
+            "X-Lovable-AIG-SDK": "fetch",
+          },
           body: JSON.stringify({
             model: "openai/gpt-6-astra",
             instructions: SYSTEM,
@@ -22,7 +28,12 @@ export const Route = createFileRoute("/api/chat")({
           }),
         });
         if (!upstream.ok || !upstream.body) {
-          const msg = upstream.status === 429 ? "Too many requests, please wait a moment." : upstream.status === 402 ? "AI credits are used up for now." : "The assistant is unavailable right now.";
+          const msg =
+            upstream.status === 429
+              ? "Too many requests, please wait a moment."
+              : upstream.status === 402
+                ? "AI credits are used up for now."
+                : "The assistant is unavailable right now.";
           return new Response(msg, { status: upstream.status });
         }
         const dec = new TextDecoder();
@@ -38,8 +49,11 @@ export const Route = createFileRoute("/api/chat")({
                 if (!line.startsWith("data:")) continue;
                 try {
                   const ev = JSON.parse(line.slice(5).trim());
-                  if (ev.type === "response.output_text.delta") controller.enqueue(enc.encode(ev.delta));
-                } catch {}
+                  if (ev.type === "response.output_text.delta")
+                    controller.enqueue(enc.encode(ev.delta));
+                } catch {
+                  // Ignore malformed SSE lines
+                }
               }
             },
           }),

@@ -2,7 +2,13 @@ import { describe, it, expect } from "vitest";
 import { completeSession, hasCompletedSession, type CareSession } from "@/lib/care-journey";
 
 describe("Care continuity after the first in-person session", () => {
-  const requested: CareSession = { id: "first", consultant: "Test consultant", date: "2026-10-20", time: "10:00", status: "Requested" };
+  const requested: CareSession = {
+    id: "first",
+    consultant: "Test consultant",
+    date: "2026-10-20",
+    time: "10:00",
+    status: "Requested",
+  };
   it("does not open after-session updates before a completed first visit", () => {
     expect(hasCompletedSession([requested])).toBe(false);
   });

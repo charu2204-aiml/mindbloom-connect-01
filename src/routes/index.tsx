@@ -1,23 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect } from "react";
+import {
+  Search,
+  Sparkles,
+  Package,
+  ClipboardCheck,
+  Info,
+  Car,
+  Navigation,
+  Utensils,
+  Wind,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
 import hero from "@/assets/hero.jpg";
-import { consultants, cities, travelPackages, foodPackages, type Consultant } from "@/data/consultants";
-import { BubblePop, Breathing } from "@/components/StressGame";
 import { Footer } from "@/components/Footer";
-import { TherapyMoments } from "@/components/TherapyMoments";
-import { TherapyClips } from "@/components/TherapyClips";
-import { CareJourney } from "@/components/CareJourney";
-import { Button } from "@/components/ui/button";
-import { bookingLanguages, type BookingLanguage } from "@/data/booking-languages";
-import { type CareSession } from "@/lib/care-journey";
+import { useCare } from "@/context/CareContext";
+import { useSiteText } from "@/lib/site-language";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TherapEase — Find trusted in-person therapists in India" },
-      { name: "description", content: "Verified clinical psychologists near you with intro videos, licence proof, transparent fees, travel & food packages." },
-      { property: "og:title", content: "TherapEase — Trusted in-person therapy in India" },
-      { property: "og:description", content: "Verified therapists, affordable fees and complete care packages." },
+      { title: "TheraPeace — Find trusted in-person therapists in India" },
+      {
+        name: "description",
+        content:
+          "Verified clinical psychologists near you with intro videos, licence proof, transparent fees, travel & food packages.",
+      },
+      { property: "og:title", content: "TheraPeace — Trusted in-person therapy in India" },
+      {
+        property: "og:description",
+        content: "Verified therapists, affordable fees and complete care packages.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -25,259 +40,208 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const steps = [
-  ["Search", "Filter licensed psychologists by name, city and your maximum session fee."],
-  ["Verify", "Watch their intro video, check licence proof, languages and clinic location."],
-  ["Book", "Pick a date & time, describe your concern and submit for approval."],
-  ["Travel & stay", "Add travel and veg / non-veg meal packages — one transparent total."],
-  ["Follow-up", "Subscription keeps your next session, aftercare and doubt-clearing calls on track."],
-];
-
-const trust = [
-  ["100% RCI-verified", "Every licence is checked before listing"],
-  ["Confidential", "Private, secure and judgement-free"],
-  ["Transparent pricing", "₹800 to premium packages — no hidden fees"],
-  ["24/7 safety net", "Crisis words connect you to Tele-MANAS 14416"],
-];
+const featureConfig = [
+  { id: "consultants", to: "/consultants", icon: Search },
+  { id: "howItWorks", to: "/how-it-works", icon: Sparkles },
+  { id: "foodTravel", to: "/food-travel", icon: Utensils },
+  { id: "packages", to: "/packages", icon: Package },
+  { id: "care", to: "/care", icon: ClipboardCheck },
+  { id: "rider", to: "/rider", icon: Car },
+  { id: "tracking", to: "/tracking", icon: Navigation },
+  { id: "relax", to: "/relax", icon: Wind },
+  { id: "about", to: "/about", icon: Info },
+] as const;
 
 function Index() {
-  const [q, setQ] = useState("");
-  const [city, setCity] = useState("");
-  const [maxFee, setMaxFee] = useState(4000);
-  const [booking, setBooking] = useState<Consultant | null>(null);
-  const [sessions, setSessions] = useState<CareSession[]>([]);
-  const [language, setLanguage] = useState<BookingLanguage>("en");
-  const [travel, setTravel] = useState(0);
-  const [food, setFood] = useState(0);
-  const [days, setDays] = useState(2);
-  const [sessionFee, setSessionFee] = useState(consultants[0]?.fee ?? 0);
+  const { t, translations } = useCare();
+  const site = useSiteText();
 
-  const list = useMemo(
-    () =>
-      consultants
-        .filter((c) => (c.name + c.title + c.focus.join(" ")).toLowerCase().includes(q.toLowerCase()))
-        .filter((c) => !city || c.city === city)
-        .filter((c) => c.fee <= maxFee)
-        .sort((a, b) => b.fee - a.fee),
-    [q, city, maxFee],
-  );
+  // Smooth scroll support for hash anchors
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash.replace("#", "");
+      const el = document.getElementById(hash);
+      if (el) {
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        requestAnimationFrame(() => {
+          el.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start",
+          });
+        });
+      }
+    }
+  }, []);
 
-  const travelPrice = travelPackages[travel]?.price ?? 0;
-  const foodPrice = foodPackages[food]?.perDay ?? 0;
-  const total = sessionFee + travelPrice + foodPrice * days;
-  function bookAgain() {
-    const recent = sessions.at(-1);
-    const consultant = consultants.find(c => c.name === recent?.consultant);
-    if (consultant) setBooking(consultant);
-    else document.getElementById("consultants")?.scrollIntoView({ behavior: "smooth" });
-  }
+  const trustItems = translations.essence?.trust || [
+    { title: "100% RCI-verified", desc: "Every licence is checked before listing" },
+    { title: "Confidential", desc: "Private, secure and judgement-free" },
+    { title: "Transparent pricing", desc: "₹800 to premium packages — no hidden fees" },
+    { title: "24/7 safety net", desc: "Crisis words connect you to Tele-MANAS 14416" },
+  ];
 
   return (
-    <div className="overflow-x-hidden">
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <span className="font-display text-2xl text-primary">TherapEase</span>
-          <nav className="hidden gap-6 text-sm md:flex">
-            <a href="#how">How it works</a><a href="#consultants">Consultants</a><a href="#packages">Packages</a><a href="#relax">Relax</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <select aria-label="Booking form language" className="max-w-28 rounded-md border bg-card px-2 py-2 text-sm" value={language} onChange={e => { const value = e.target.value; if (value in bookingLanguages) setLanguage(value as BookingLanguage); }}>{Object.entries(bookingLanguages).map(([code, labels]) => <option key={code} value={code}>{labels.name}</option>)}</select>
-            <a href="#consultants" className="btn-primary !px-4 !py-2">Find a therapist</a>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="bg-soft">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 md:grid-cols-2 md:py-20">
+    <div className="overflow-x-hidden pb-24 md:pb-12">
+      {/* Hero Section */}
+      <section className="bg-soft border-b border-border/40">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 md:grid-cols-2 md:py-20">
           <div>
-            <span className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary">Made in India · For India</span>
-            <h1 className="mt-5 text-4xl leading-tight md:text-6xl">Real therapy, with people you can <em className="text-primary">trust</em>.</h1>
-            <p className="mt-5 max-w-md text-muted-foreground">TherapEase connects you with licensed clinical psychologists for in-person sessions — verified, affordable, with travel and meals arranged for you.</p>
+            <span className="rounded-full bg-card px-3.5 py-1 text-xs font-semibold text-primary shadow-xs border">
+              {t("hero.badge")}
+            </span>
+            <h1 className="mt-5 text-4xl leading-tight md:text-5xl lg:text-6xl font-display">
+              {t("hero.titleBefore")}{" "}
+              <em className="text-primary italic">{t("hero.titleTrust")}</em>.
+            </h1>
+            <p className="mt-5 max-w-md text-base md:text-lg text-muted-foreground leading-relaxed">
+              {t("hero.sub")}
+            </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="#consultants" className="btn-primary">Search consultants</a>
-              <a href="#how" className="btn-ghost">How it works</a>
+              <Link
+                to="/consultants"
+                className="btn-primary !px-5 !py-3 inline-flex items-center gap-2"
+              >
+                <span>{t("hero.searchBtn")}</span>
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link to="/how-it-works" className="btn-ghost !px-5 !py-3">
+                {t("hero.howBtn")}
+              </Link>
             </div>
           </div>
-          <img src={hero} alt="Calm therapy session" width={1024} height={1024} className="aspect-square w-full rounded-[2rem] object-cover shadow-soft" />
+          <img
+            src={hero}
+            alt="Calm therapy session"
+            width={1024}
+            height={1024}
+            className="aspect-square w-full rounded-[2rem] object-cover shadow-soft border"
+          />
         </div>
       </section>
 
-      {/* Why */}
+      {/* Why TheraPeace / Essence */}
       <section className="mx-auto max-w-6xl px-5 py-16">
-        <h2 className="text-3xl md:text-4xl">TherapEase in essence</h2>
-        <p className="mt-4 max-w-3xl leading-relaxed text-muted-foreground">
-          India has apps for doctors, diet, fitness and yoga — yet no trusted platform to find a real therapist for an in-person session. Social media and AI search offer endless names but little credibility. Just as food-delivery platforms earned trust by bringing every restaurant under one roof, TherapEase unites verified mental-health professionals in one place: each with an intro video, licence proof, location and fees for every budget, from ₹800 sessions to complete ₹10,000–₹25,000 care packages.
-        </p>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {trust.map(([t, d]) => (
-            <div key={t} className="rounded-2xl border bg-card p-5"><p className="font-semibold text-primary">✓ {t}</p><p className="mt-1 text-sm text-muted-foreground">{d}</p></div>
+        <div className="max-w-3xl">
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            {t("essence.badge")}
+          </span>
+          <h2 className="mt-2 text-3xl md:text-4xl font-display font-semibold">
+            {t("essence.title")}
+          </h2>
+          <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+            {t("essence.body")}
+          </p>
+        </div>
+
+        {/* 4 Trust Cards */}
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {trustItems.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border bg-card p-6 shadow-xs transition hover:border-primary/40"
+            >
+              <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+                <CheckCircle2 className="size-4" />
+                <span>{item.title}</span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* How */}
-      <section id="how" className="bg-muted py-16">
+      {/* Feature Grid: 9 Dedicated Hub Destinations */}
+      <section className="bg-muted/40 border-y py-16">
         <div className="mx-auto max-w-6xl px-5">
-          <h2 className="text-3xl md:text-4xl">How TherapEase works</h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-5">
-            {steps.map(([t, d], i) => (
-              <div key={t} className="rounded-2xl bg-card p-5 shadow-soft">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-strong text-sm font-bold text-primary-foreground">{i + 1}</span>
-                <p className="mt-4 font-semibold">{t}</p><p className="mt-1 text-sm text-muted-foreground">{d}</p>
-              </div>
-            ))}
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              {t("featureGrid.badge")}
+            </span>
+            <h2 className="mt-2 text-3xl md:text-4xl font-display font-semibold">
+              {t("featureGrid.title")}
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featureConfig.map((feat) => {
+              const Icon = feat.icon;
+              const title = t(`featureGrid.${feat.id}.title`);
+              const desc = t(`featureGrid.${feat.id}.desc`);
+              const tag = t(`featureGrid.${feat.id}.tag`);
+
+              return (
+                <Link
+                  key={feat.id}
+                  to={feat.to}
+                  className="group relative flex flex-col justify-between rounded-2xl border bg-card p-6 shadow-soft transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="grid size-12 place-items-center rounded-xl bg-soft text-primary transition-transform group-hover:scale-110">
+                        <Icon className="size-6" />
+                      </div>
+                      <span className="rounded-full bg-secondary/80 px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+                        {tag}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {title}
+                    </h3>
+                    <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-1.5 text-xs font-semibold text-primary pt-2 border-t border-border/50">
+                    <span>Explore</span>
+                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <TherapyMoments />
-      <TherapyClips />
-
-      {/* Search + list */}
-      <section id="consultants" className="mx-auto max-w-6xl px-5 py-16">
-        <h2 className="text-3xl md:text-4xl">Find your consultant</h2>
-        <div className="mt-6 grid gap-3 rounded-2xl border bg-card p-4 shadow-soft md:grid-cols-3">
-          <input className="input-field" placeholder="Search name or concern (e.g. anxiety)" value={q} onChange={(e) => setQ(e.target.value)} />
-          <select className="input-field" value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">All locations</option>{cities.map((c) => <option key={c}>{c}</option>)}
-          </select>
-          <label className="text-sm">Max session fee: <b>₹{maxFee}</b>
-            <input type="range" min={500} max={4000} step={100} value={maxFee} onChange={(e) => setMaxFee(+e.target.value)} className="w-full accent-[var(--primary)]" />
-          </label>
-        </div>
-        <p className="mt-4 text-sm text-muted-foreground">{list.length} consultants · sorted by fee, high to low</p>
-        <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {list.map((c) => (
-            <article key={c.id} className="flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft">
-              <div className="relative grid h-36 place-items-center bg-soft">
-                <span className="grid h-16 w-16 place-items-center rounded-full bg-card font-display text-xl text-primary">{c.initials}</span>
-                <span className="absolute bottom-2 right-2 rounded-full bg-plum/80 px-2 py-0.5 text-xs text-primary-foreground">▶ Intro video</span>
-              </div>
-              <div className="flex flex-1 flex-col p-5">
-                <h3 className="text-xl">{c.name}</h3>
-                <p className="text-sm text-muted-foreground">{c.title} · {c.experience} yrs</p>
-                <p className="mt-2 text-xs font-semibold text-primary">✓ Licensed · {c.license}</p>
-                <p className="mt-3 text-sm">{c.bio}</p>
-                <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-                  <p>📍 {c.city}</p><p>🗣 {c.languages.join(", ")}</p><p>🗓 In-person: {c.availability.join(", ")}</p>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1">{c.focus.map((f) => <span key={f} className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{f}</span>)}</div>
-                <div className="mt-auto flex items-center justify-between pt-5">
-                  <div><p className="text-xs text-muted-foreground">First consultation</p><p className="text-2xl font-bold text-primary">₹{c.fee.toLocaleString("en-IN")}</p></div>
-                  <button onClick={() => setBooking(c)} className="btn-primary">View & book</button>
-                </div>
-              </div>
-            </article>
+      {/* FAQ Section */}
+      <section className="mx-auto max-w-4xl px-5 py-16">
+        <h2 className="text-3xl md:text-4xl font-display font-semibold text-center">
+          {site.faq.title}
+        </h2>
+        <div className="mt-8 space-y-4">
+          {site.faq.items.map(([question, answer], index) => (
+            <details
+              key={index}
+              className="rounded-2xl border bg-card p-5 shadow-xs transition-colors open:border-primary/40"
+            >
+              <summary className="cursor-pointer text-base font-semibold text-foreground">
+                {question}
+              </summary>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{answer}</p>
+            </details>
           ))}
-          {!list.length && <p className="text-muted-foreground">No consultants match. Try increasing the max fee.</p>}
         </div>
       </section>
 
-      {/* Packages */}
-      <section id="packages" className="bg-muted py-16">
-        <div className="mx-auto max-w-6xl px-5">
-          <h2 className="text-3xl md:text-4xl">Travel & food packages</h2>
-          <p className="mt-2 text-muted-foreground">Build your full care package and see an estimated total.</p>
-          <div className="mt-8 grid gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
-              <div>
-                <p className="mb-3 font-semibold">Travel (by distance)</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {travelPackages.map((t, i) => (
-                    <button key={t.name} onClick={() => setTravel(i)} className={`rounded-2xl border-2 bg-card p-4 text-left ${travel === i ? "border-primary" : "border-transparent"}`}>
-                      <p className="font-semibold">{t.name} · ₹{t.price.toLocaleString("en-IN")}</p><p className="text-sm text-muted-foreground">{t.range} — {t.mode}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 font-semibold">Food (per day)</p>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {foodPackages.map((f, i) => (
-                    <button key={f.name} onClick={() => setFood(i)} className={`rounded-2xl border-2 bg-card p-4 text-left ${food === i ? "border-primary" : "border-transparent"}`}>
-                      <p className="font-semibold">{f.name}</p><p className="text-sm text-muted-foreground">{f.desc}</p><p className="mt-1 text-sm font-semibold text-primary">₹{f.perDay}/day</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="h-fit rounded-2xl bg-card p-6 shadow-soft">
-              <p className="font-display text-xl">Estimated package</p>
-              <label className="mt-4 block text-sm">Consultant
-                <select className="input-field mt-1" value={sessionFee} onChange={(e) => setSessionFee(+e.target.value)}>
-                  {consultants.map((c) => <option key={c.id} value={c.fee}>{c.name} — ₹{c.fee}</option>)}
-                </select>
-              </label>
-              <label className="mt-3 block text-sm">Days of stay
-                <input type="number" min={1} max={14} className="input-field mt-1" value={days} onChange={(e) => setDays(Math.max(1, +e.target.value))} />
-              </label>
-              <div className="mt-4 space-y-1 text-sm">
-                <p className="flex justify-between"><span>Session</span><span>₹{sessionFee.toLocaleString("en-IN")}</span></p>
-                  <p className="flex justify-between"><span>Travel</span><span>₹{travelPrice.toLocaleString("en-IN")}</span></p>
-                  <p className="flex justify-between"><span>Food × {days}</span><span>₹{(foodPrice * days).toLocaleString("en-IN")}</span></p>
-              </div>
-              <p className="mt-4 flex justify-between border-t pt-4 text-lg font-bold"><span>Total</span><span className="text-primary">₹{total.toLocaleString("en-IN")}</span></p>
-            </div>
+      {/* Join As Licensed Psychologist */}
+      <section className="bg-soft border-t border-border/40 py-16">
+        <div className="mx-auto max-w-4xl px-5 text-center">
+          <h2 className="text-3xl md:text-4xl font-display font-semibold">{site.join.title}</h2>
+          <p className="mt-3 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            {site.join.text}
+          </p>
+          <div className="mt-6">
+            <a
+              href="mailto:care@therapeace.in"
+              className="btn-primary !px-6 !py-3 inline-flex items-center gap-2"
+            >
+              <span>{site.join.cta}</span>
+              <ArrowRight className="size-4" />
+            </a>
           </div>
         </div>
-      </section>
-
-      {/* Subscription */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <div className="rounded-[2rem] bg-strong p-8 text-primary-foreground md:p-12">
-          <h2 className="text-3xl md:text-4xl">TherapEase Care+ subscription</h2>
-          <p className="mt-3 max-w-2xl opacity-90">Never lose track of your healing: next-session reminders, personalised aftercare & intake guidance, and on-demand doubt-clearing sessions with your consultant.</p>
-          <p className="mt-6 text-3xl font-bold">₹299<span className="text-base font-normal">/month</span></p>
-        </div>
-      </section>
-
-      {/* Relax */}
-      <CareJourney sessions={sessions} onSessionsChange={setSessions} onBook={bookAgain} />
-      <section id="relax" className="mx-auto max-w-6xl px-5 pb-8">
-        <h2 className="text-3xl md:text-4xl">Take a breather</h2>
-        <p className="mt-2 text-muted-foreground">Quick stress-busters while you wait.</p>
-        <div className="mt-6 grid gap-6 md:grid-cols-2"><BubblePop /><Breathing /></div>
       </section>
 
       <Footer />
-      {booking && <BookingModal c={booking} language={language} onLanguageChange={setLanguage} onRequest={(date, time) => setSessions(previous => [...previous, { id: crypto.randomUUID(), consultant: booking.name, date, time, status: "Requested" }])} onClose={() => setBooking(null)} />}
-    </div>
-  );
-}
-
-function BookingModal({ c, onClose, language, onLanguageChange, onRequest }: { c: Consultant; onClose: () => void; language: BookingLanguage; onLanguageChange: (language: BookingLanguage) => void; onRequest: (date: string, time: string) => void }) {
-  const [done, setDone] = useState(false);
-  const labels = bookingLanguages[language];
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-plum/50 p-4" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={c.name} lang={language} className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-card p-6 shadow-soft" onClick={(e) => e.stopPropagation()}>
-        {done ? (
-          <div className="py-6 text-center">
-            <p className="text-4xl">🌸</p>
-            <h3 className="mt-3 text-2xl">{labels.requested}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Prototype request added to your care dates. It has not been sent to {c.name}.</p>
-            <Button onClick={onClose} className="mt-6">{labels.done}</Button>
-          </div>
-        ) : (
-          <form onSubmit={(e) => { e.preventDefault(); const data = new FormData(e.currentTarget); onRequest(String(data.get("date")), String(data.get("time"))); setDone(true); }} className="space-y-3">
-            <div className="flex items-start justify-between">
-              <div><h3 className="text-2xl">{c.name}</h3><p className="text-sm text-muted-foreground">{c.title} · 📍 {c.city}</p></div>
-              <Button type="button" variant="ghost" size="icon" aria-label="Close booking" onClick={onClose}>×</Button>
-            </div>
-            <p className="rounded-xl bg-muted p-3 text-sm">{c.bio} <b className="text-primary">First session ₹{c.fee}</b></p>
-            <select aria-label="Form language" className="input-field" value={language} onChange={e => { const value = e.target.value; if (value in bookingLanguages) onLanguageChange(value as BookingLanguage); }}>{Object.entries(bookingLanguages).map(([code, value]) => <option key={code} value={code}>{value.name}</option>)}</select>
-            <p className="text-xs text-muted-foreground">{labels.note}</p>
-            <label className="block text-sm">{labels.yourName}<input name="name" required autoComplete="name" className="input-field mt-1" placeholder={labels.yourName} /></label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="min-w-0 text-sm">{labels.date}<input name="date" required type="date" className="input-field mt-1 min-w-0" /></label>
-              <label className="min-w-0 text-sm">{labels.time}<input name="time" required type="time" className="input-field mt-1 min-w-0" /></label>
-            </div>
-            <label className="block text-sm">{labels.concern}<textarea name="concern" required rows={4} className="input-field mt-1" placeholder={labels.concern} /></label>
-            <Button className="h-auto min-h-10 w-full whitespace-normal">{labels.submit}</Button>
-          </form>
-        )}
-      </div>
     </div>
   );
 }
